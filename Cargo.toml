@@ -1,0 +1,13 @@
+[package]
+
+name = "ogg-sys"
+version = "0.1.0"
+authors = ["The Ogg Project Developers"]
+
+build = "build.rs"
+
+[lib]
+
+name = "ogg-sys"
+path = "lib.rs"
+

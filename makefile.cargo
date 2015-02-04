@@ -1,0 +1,35 @@
+CC ?= gcc
+AR ?= ar
+
+CFLAGS += -Iinclude -O2
+
+OGG_SRC = \
+	$(addprefix src/,\
+		framing.c \
+		bitwise.c)
+
+OGG_HEADERS = \
+	$(addprefix include/ogg/,\
+		ogg.h \
+		os_types.h)
+
+OGG_OBJS = $(patsubst %.c,$(OUT_DIR)/%.o,$(OGG_SRC))
+
+INSTALLED_HEADERS := $(patsubst %.h,$(OUT_DIR)/%.h,$(OGG_HEADERS))
+
+.PHONY:	all clean
+
+all:	$(OUT_DIR)/libogg.a $(INSTALLED_HEADERS)
+
+clean:
+	rm -f $(OUT_DIR)/libogg.a $(OGG_OBJS)
+
+$(OUT_DIR)/%.o:	%.c
+	mkdir -p `dirname $@` && $(CC) -c $(CFLAGS) -o $@ $<
+
+$(OUT_DIR)/%.h:	%.h
+	mkdir -p `dirname $@` && cp $^ $@
+
+$(OUT_DIR)/libogg.a:	$(OGG_OBJS)
+	$(AR) rcs $@ $(OGG_OBJS)
+
