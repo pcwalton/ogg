@@ -1,7 +1,7 @@
 CC ?= gcc
 AR ?= ar
 
-CFLAGS += -Iinclude -O2
+CFLAGS += -Iinclude -I$(OUT_DIR)/include -O2 -fPIC
 
 OGG_SRC = \
 	$(addprefix src/,\
@@ -15,21 +15,37 @@ OGG_HEADERS = \
 
 OGG_OBJS = $(patsubst %.c,$(OUT_DIR)/%.o,$(OGG_SRC))
 
+GENERATED_HEADERS = \
+	$(addprefix $(OUT_DIR)/include/ogg/,\
+		config_types.h)
+
 INSTALLED_HEADERS := $(patsubst %.h,$(OUT_DIR)/%.h,$(OGG_HEADERS))
 
 .PHONY:	all clean
 
-all:	$(OUT_DIR)/libogg.a $(INSTALLED_HEADERS)
+all:	$(OUT_DIR)/librustogg.a $(INSTALLED_HEADERS)
 
 clean:
-	rm -f $(OUT_DIR)/libogg.a $(OGG_OBJS)
+	rm -f $(OUT_DIR)/librustogg.a $(OGG_OBJS)
 
-$(OUT_DIR)/%.o:	%.c
+$(OUT_DIR)/include/ogg/config_types.h:
+	mkdir -p `dirname $@`
+	echo "#ifndef __CONFIG_TYPES_H__" > $@
+	echo "#define __CONFIG_TYPES_H__" >> $@
+	echo "#include <stdint.h>" >> $@
+	echo "typedef int16_t ogg_int16_t;" >> $@
+	echo "typedef uint16_t ogg_uint16_t;" >> $@
+	echo "typedef int32_t ogg_int32_t;" >> $@
+	echo "typedef uint32_t ogg_uint32_t;" >> $@
+	echo "typedef int64_t ogg_int64_t;" >> $@
+	echo "#endif" >> $@
+
+$(OUT_DIR)/%.o:	%.c $(GENERATED_HEADERS)
 	mkdir -p `dirname $@` && $(CC) -c $(CFLAGS) -o $@ $<
 
 $(OUT_DIR)/%.h:	%.h
 	mkdir -p `dirname $@` && cp $^ $@
 
-$(OUT_DIR)/libogg.a:	$(OGG_OBJS)
+$(OUT_DIR)/librustogg.a:	$(OGG_OBJS)
 	$(AR) rcs $@ $(OGG_OBJS)
 
