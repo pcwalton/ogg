@@ -8,6 +8,6 @@ build = "build.rs"
 
 [lib]
 
-name = "ogg-sys"
+name = "ogg_sys"
 path = "lib.rs"
 
